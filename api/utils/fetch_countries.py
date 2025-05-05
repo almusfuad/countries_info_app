@@ -1,5 +1,5 @@
 import requests
-from django.http import JsonResponse, HttpResponseServerError
+from api.models.countries_info import CountryInfo
 
 
 def fetch_data():
@@ -73,4 +73,54 @@ def preprocess_data(fetched_data):
         }
         processed_data.append(country_info)
     return processed_data
+    
+
+    
+def populate_database():
+    """Populate the database with the processed data.
+    This function takes the processed data and populates the database with it.
+    It uses the Django ORM to create or update records in the database.
+    
+    
+    Returns:
+        None
+    """
+    
+    fetched_data, error_msg = fetch_data()
+    
+    if error_msg:
+        print(f"Error: Failed to fetch data from the API: {error_msg}")
+        return
+    
+    if not fetched_data:
+        print("Warning: No data fetched from the API.")
+        return
+    
+    
+    processed_countries = preprocess_data(fetched_data)
+    if not processed_countries:
+        print("Warning: No data to process.")
+        return
+    
+    
+    print(f"Number of countries to be populated: {len(processed_countries)}")
+    created_count = 0
+    updated_count = 0
+    
+    
+    for country_data in processed_countries:
+        try:
+            # Use update_or_create for idempotency
+            country, created = CountryInfo.objects.update_or_create(
+                name = country_data["name"],
+                defaults= country_data
+            )
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+        except Exception as e:
+            print(f"Error: Failed to save country data: {country_data['name']}. Error: {str(e)}")
+            
+    print(f"Database population complete. Created: {created_count}, Updated: {updated_count}")
     
