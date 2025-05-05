@@ -40,10 +40,37 @@ def fetch_data():
     if error_message:
         print(error_message)
 
-    return countries_data, error_message    
-    
+    return countries_data, error_message  
 
-if __name__ == "__main__":
-    print("This module is not meant to be run directly.")
-    fetch_data()
-    print("Countries data fetched successfully.")
+
+def preprocess_data(fetched_data):
+    """Preprocess the fetched data.
+    This function processes the fetched data to extract relevant information.
+    
+    Args:
+        fetched_data (list): The data fetched from the API.
+    Returns:
+        list: A list of dictionaries containing relevant information about each country.
+    """  
+    
+    processed_data = []
+    if not fetched_data:
+        return processed_data
+    
+    
+    for country in fetched_data:
+        country_info = {
+            "name": country.get("name", {}).get("common", ""),
+            "capital": country.get("capital", [""])[0],
+            "region": country.get("region", ""),
+            "subregion": country.get("subregion", ""),
+            "population": country.get("population", 0),
+            "area": country.get("area", 0.0),
+            "languages": list(country.get("languages", {}).values()),
+            "currencies": list(country.get("currencies", {}).values()),
+            "timezones": country.get("timezones", []),
+            "flag": country.get("flags", {}).get("png", ""),
+        }
+        processed_data.append(country_info)
+    return processed_data
+    
