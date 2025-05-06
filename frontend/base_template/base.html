@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} {% endblock %}</title>
+    <!-- Bulma CSS CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- React CDNs -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.22.9/babel.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!-- Cookie Utility -->
+    <script src="{% static 'js/cookie.js' %}"></script>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </section>
+    <!-- Load app.js at the end -->
+    {% block scripts %}
+    <script src="{% static 'js/components/LoginForm.js' %}" type="text/babel"></script>
+    <script src="{% static 'js/components/CountryTable.js' %}" type="text/babel"></script>
+    <script src="{% static 'js/components/DetailsModal.js' %}" type="text/babel"></script>
+    <script src="{% static 'js/components/CountriesList.js' %}" type="text/babel"></script>
+    <script src="{% static 'js/app.js' %}" type="text/babel"></script>
+    {% endblock %}
+</body>
+</html>
