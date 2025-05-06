@@ -1,14 +1,19 @@
 const { useState, useEffect } = React;
 
-const CountriesList = ({ countries, onLogout }) => {
+const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetchCountries }) => {
     const [filteredCountries, setFilteredCountries] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCountry, setSelectedCountry] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(paginationData.count || 0);
+    const [nextUrl, setNextUrl] = useState(paginationData.next || null);
+    const [previousUrl, setPreviousUrl] = useState(paginationData.previous || null);
+    const [loading, setLoading] = useState(false);
     const countriesPerPage = 25;
 
     useEffect(() => {
         console.log('Countries prop:', countries);
+        console.log('Pagination data:', paginationData);
         if (!Array.isArray(countries)) {
             console.error('Invalid countries prop:', countries);
             setFilteredCountries([]);
@@ -19,17 +24,42 @@ const CountriesList = ({ countries, onLogout }) => {
         );
         console.log('Filtered countries:', filtered);
         setFilteredCountries(filtered);
-        setCurrentPage(1);
-    }, [searchTerm, countries]);
+        setTotalCount(paginationData.count || 0);
+        setNextUrl(paginationData.next || null);
+        setPreviousUrl(paginationData.previous || null);
+    }, [searchTerm, countries, paginationData]);
 
-    const indexOfLastCountry = currentPage * countriesPerPage;
-    const indexOfFirstCountry = indexOfLastCountry - countriesPerPage;
-    const currentCountries = filteredCountries.slice(indexOfFirstCountry, indexOfLastCountry);
-    const totalPages = Math.ceil(filteredCountries.length / countriesPerPage);
+    const fetchPage = async (url, pageNum) => {
+        if (!url) return;
+        setLoading(true);
+        const accessToken = getCookie('access');
+        try {
+            const data = await fetchCountries(accessToken, { url });
+            setCountries(data.results);
+            setTotalCount(data.count);
+            setNextUrl(data.next);
+            setPreviousUrl(data.previous);
+            setCurrentPage(pageNum);
+        } catch (err) {
+            console.error('Fetch page error:', err);
+            if (typeof showNotification === 'function') {
+                showNotification('Failed to fetch page. Please try again.', 'is-danger');
+            } else {
+                console.warn('showNotification not defined, using console');
+            }
+        }
+        setLoading(false);
+    };
 
-    const handlePageChange = (page) => {
-        if (page >= 1 && page <= totalPages) {
-            setCurrentPage(page);
+    const handlePrevious = () => {
+        if (previousUrl) {
+            fetchPage(previousUrl, currentPage - 1);
+        }
+    };
+
+    const handleNext = () => {
+        if (nextUrl) {
+            fetchPage(nextUrl, currentPage + 1);
         }
     };
 
@@ -40,6 +70,8 @@ const CountriesList = ({ countries, onLogout }) => {
     const handleCloseModal = () => {
         setSelectedCountry(null);
     };
+
+    const totalPages = Math.ceil((searchTerm ? filteredCountries.length : totalCount) / countriesPerPage);
 
     return (
         <div className="container is-max-desktop">
@@ -61,33 +93,45 @@ const CountriesList = ({ countries, onLogout }) => {
                             type="text"
                             placeholder="Search by country name"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => {
+                                console.log('Search term:', e.target.value);
+                                setSearchTerm(e.target.value);
+                            }}
                             style={{ maxWidth: '500px' }}
                         />
                         <span className="icon is-small is-left">
                             <i className="fas fa-search"></i>
                         </span>
                     </div>
+                    {searchTerm && (
+                        <p className="help">Search applies to current page only.</p>
+                    )}
                 </div>
                 <div className="box" style={{ minHeight: '400px' }}>
-                    {filteredCountries.length > 0 ? (
+                    {loading ? (
+                        <div className="has-text-centered">
+                            <span className="icon is-large">
+                                <i className="fas fa-spinner fa-pulse fa-2x"></i>
+                            </span>
+                        </div>
+                    ) : filteredCountries.length > 0 ? (
                         <>
                             <CountryTable 
-                                countries={currentCountries}
+                                countries={filteredCountries}
                                 onDetailsClick={handleDetailsClick}
                             />
                             <nav className="pagination" role="navigation" aria-label="pagination">
                                 <button
                                     className="button pagination-previous"
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
+                                    onClick={handlePrevious}
+                                    disabled={!previousUrl || loading}
                                 >
                                     Previous
                                 </button>
                                 <button
                                     className="button pagination-next"
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
+                                    onClick={handleNext}
+                                    disabled={!nextUrl || loading}
                                 >
                                     Next
                                 </button>
@@ -96,7 +140,8 @@ const CountriesList = ({ countries, onLogout }) => {
                                         <li key={page}>
                                             <button
                                                 className={`pagination-link ${page === currentPage ? 'is-current' : ''}`}
-                                                onClick={() => handlePageChange(page)}
+                                                onClick={() => fetchPage(`/api/v1/countries/?page=${page}&page_size=25`, page)}
+                                                disabled={loading}
                                             >
                                                 {page}
                                             </button>
