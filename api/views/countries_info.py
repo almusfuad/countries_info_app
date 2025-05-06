@@ -2,9 +2,27 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from api.models.countries_info import CountryInfo
 from api.serializers.countries_info import CountryInfoSerializer
+
+
+class CountryInfoPagination(PageNumberPagination):
+    """Custom pagination class for CountryInfoViewSet.
+    
+    This class customizes the pagination settings for the CountryInfoViewSet.
+    """
+    
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
+    page_query_param = "page"
+    last_page_strings = ("last",)
+    invalid_page_message = "Invalid page number."
+
 
 
 
@@ -19,6 +37,9 @@ class CountryInfoViewSet(ModelViewSet):
     serializer_class = CountryInfoSerializer
     lookup_field = "id"
     lookup_url_kwarg = "country_id"
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    pagination_class = CountryInfoPagination
     
             
     
