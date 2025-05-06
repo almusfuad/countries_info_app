@@ -75,13 +75,15 @@ const App = () => {
 
     const handleLogout = () => {
         const refreshToken = getCookie('refresh');
+        const accessToken = getCookie('access');
         if (refreshToken) {
-            fetch('/auth/v1/logout/', {
-                method: 'POST',
+            fetch(`/auth/v1/logout/?refresh_token=${refreshToken}`, {
+                method: 'GET',
                 headers: {
+                    'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ refresh: refreshToken }),
+                
             })
                 .then(response => {
                     if (response.ok) {

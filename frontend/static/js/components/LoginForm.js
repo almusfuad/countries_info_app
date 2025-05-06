@@ -51,58 +51,60 @@ const { useState } = React;
 
 
         return (
-            <div className="column is-full">
-                <div className="box">
-                    <h1 className="title has-text-centered">Login</h1>
-                    {notification && (
-                        <div className={`notification ${notification.type}`}>
-                            <button className='delete' onClick={() => setNotification(null)}></button>
-                            {notification.message}
+            <div className="columns is-centered">
+                <div className="column is-half">
+                    <div className="box mx-auto" style={{ maxWidth: '500px' }}>
+                        <h1 className="title has-text-centered">Login</h1>
+                        {notification && (
+                            <div className={`notification ${notification.type}`}>
+                                <button className="delete" onClick={() => setNotification(null)}></button>
+                                {notification.message}
+                            </div>
+                        )}
+                        <div className="field">
+                            <label className="label">Username</label>
+                            <div className="control has-icons-left">
+                                <input
+                                    className="input"
+                                    type="text"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    required
+                                    placeholder="Enter your username"
+                                    disabled={loading}
+                                />
+                                <span className="icon is-small is-left">
+                                    <i className="fas fa-user"></i>
+                                </span>
+                            </div>
                         </div>
-                    )}
-                    <div className="field">
-                        <label className="label">Username</label>
-                        <div className="control has-icons-left">
-                            <input
-                                className="input"
-                                type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                                placeholder="Enter your username"
-                                disabled={loading}
-                            />
-                            <span className="icon is-small is-left">
-                                <i className="fa fa-user"></i>
-                            </span>
+                        <div className="field">
+                            <label className="label">Password</label>
+                            <div className="control has-icons-left">
+                                <input 
+                                    className="input"
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    placeholder="Enter your password"
+                                    disabled={loading}
+                                />
+                                <span className="icon is-small is-left">
+                                    <i className="fas fa-lock"></i>
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                    <div className="field">
-                        <label className="label">Password</label>
-                        <div className="control has-icons-left">
-                            <input 
-                                className="input"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                placeholder="Enter your password"
-                                disabled={loading}
-                            />
-                            <span className="icon is-small is-left">
-                                <i className="fas fa-lock"></i>
-                            </span>
-                        </div>
-                    </div>
-                    <div className="field">
-                        <div className="control">
-                            <button
-                                className={`button is-primary is-fullwidth ${loading ? 'is-loading' : ''}`}
-                                onClick={handleSubmit}
-                                disabled={loading}
-                            >
-                                Login
-                            </button>
+                        <div className="field">
+                            <div className="control">
+                                <button
+                                    className={`button is-primary is-fullwidth ${loading ? 'is-loading' : ''}`}
+                                    onClick={handleSubmit}
+                                    disabled={loading}
+                                >
+                                    Login
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
