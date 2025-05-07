@@ -102,7 +102,7 @@ def populate_database():
     created_count = 0
     updated_count = 0
     
-    # Define editable fields for bulk_update (excluding primary key and non-editable fields)
+    # Define editable fields for bulk_update
     editable_fields = [
         "name", "cca2", "capital", "region", "subregion", 
         "population", "area", "languages", "currencies", 
