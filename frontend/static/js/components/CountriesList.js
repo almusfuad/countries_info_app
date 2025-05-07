@@ -2,6 +2,7 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
     const [filteredCountries, setFilteredCountries] = React.useState([]);
     const [searchTerm, setSearchTerm] = React.useState('');
     const [selectedCountry, setSelectedCountry] = React.useState(null);
+    const [showAddModal, setShowAddModal] = React.useState(false);
     const [currentPage, setCurrentPage] = React.useState(1);
     const [totalCount, setTotalCount] = React.useState(paginationData.count || 0);
     const [nextUrl, setNextUrl] = React.useState(paginationData.next || null);
@@ -12,6 +13,7 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
     React.useEffect(() => {
         console.log('Countries prop:', countries);
         console.log('Pagination data:', paginationData);
+        console.log('Total count:', totalCount, 'Current page:', currentPage);
         if (!Array.isArray(countries)) {
             console.error('Invalid countries prop:', countries);
             setFilteredCountries([]);
@@ -28,12 +30,17 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
     }, [searchTerm, countries, paginationData]);
 
     const fetchPage = async (url, pageNum) => {
-        if (!url) return;
+        if (!url) {
+            console.warn('No URL provided for fetchPage:', { url, pageNum });
+            return;
+        }
         setLoading(true);
         const accessToken = getCookie('access');
         try {
+            console.log('Fetching page:', url);
             const data = await fetchCountries(accessToken, { url });
-            setCountries(data.results);
+            console.log('Fetched data:', data);
+            setCountries(data.results.sort((a, b) => (a.name || '').localeCompare(b.name || '')));
             setTotalCount(data.count);
             setNextUrl(data.next);
             setPreviousUrl(data.previous);
@@ -47,17 +54,20 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
 
     const handlePrevious = () => {
         if (previousUrl) {
+            console.log('Navigating to previous page:', previousUrl);
             fetchPage(previousUrl, currentPage - 1);
         }
     };
 
     const handleNext = () => {
         if (nextUrl) {
+            console.log('Navigating to next page:', nextUrl);
             fetchPage(nextUrl, currentPage + 1);
         }
     };
 
     const handleDetailsClick = (country) => {
+        console.log('Selected country:', country);
         setSelectedCountry(country);
     };
 
@@ -69,19 +79,20 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
         setLoading(true);
         const accessToken = getCookie('access');
         try {
-            // Check if deleting the last item on the page
-            const newTotalCount = totalCount - 1;
             let targetPage = currentPage;
             if (countries.length === 1 && currentPage > 1) {
-                targetPage = currentPage - 1; // Go to previous page
+                targetPage = currentPage - 1;
             }
+            console.log('Deleting country ID:', countryId, 'Target page:', targetPage);
             const data = await fetchCountries(accessToken, { page: targetPage });
-            setCountries(data.results);
-            setTotalCount(newTotalCount);
+            console.log('Post-delete data:', data);
+            setCountries(data.results.sort((a, b) => (a.name || '').localeCompare(b.name || '')));
+            setTotalCount(data.count);
             setNextUrl(data.next);
             setPreviousUrl(data.previous);
             setCurrentPage(targetPage);
             setSelectedCountry(null);
+            showNotification('Country deleted successfully.', 'is-success');
         } catch (err) {
             console.error('Error refreshing countries after delete:', err);
             showNotification('Failed to refresh country list.', 'is-danger');
@@ -89,7 +100,41 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
         setLoading(false);
     };
 
+    const handleAddCountry = async (newCountry) => {
+        setLoading(true);
+        const accessToken = getCookie('access');
+        try {
+            console.log('Adding country:', newCountry);
+            const response = await axios.post('/api/v1/countries/', newCountry, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            // Estimate the page where the new country would appear based on its name
+            const newCountryName = newCountry.name.toLowerCase();
+            const sortedCountries = [...countries, response.data].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            const newIndex = sortedCountries.findIndex(c => c.name.toLowerCase() === newCountryName);
+            const targetPage = Math.floor(newIndex / countriesPerPage) + 1;
+            console.log('New country index:', newIndex, 'Target page:', targetPage);
+            const data = await fetchCountries(accessToken, { page: targetPage });
+            console.log('Post-add data:', data);
+            setCountries(data.results.sort((a, b) => (a.name || '').localeCompare(b.name || '')));
+            setTotalCount(data.count);
+            setNextUrl(data.next);
+            setPreviousUrl(data.previous);
+            setCurrentPage(targetPage);
+            showNotification(`Country '${response.data.name}' added successfully.`, 'is-success');
+            setShowAddModal(false);
+        } catch (err) {
+            console.error('Error adding country:', err);
+            showNotification(err.response?.data?.detail || 'Failed to add country.', 'is-danger');
+        }
+        setLoading(false);
+    };
+
     const totalPages = Math.ceil(totalCount / countriesPerPage);
+    console.log('Total pages:', totalPages, 'Total count:', totalCount);
 
     return (
         <div className="container is-max-desktop">
@@ -99,7 +144,18 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
                         <h1 className="title">Countries Information</h1>
                     </div>
                     <div className="level-right">
-                        <button className="button is-danger" onClick={onLogout}>
+                        <button 
+                            className="button is-primary mr-2" 
+                            onClick={() => setShowAddModal(true)}
+                            disabled={loading}
+                        >
+                            Add Country
+                        </button>
+                        <button 
+                            className="button is-danger" 
+                            onClick={onLogout}
+                            disabled={loading}
+                        >
                             Logout
                         </button>
                     </div>
@@ -159,7 +215,7 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
                                         <li key={page}>
                                             <button
                                                 className={`pagination-link ${page === currentPage ? 'is-current' : ''}`}
-                                                onClick={() => fetchPage(`/api/v1/countries/?page=${page}&page_size=25`, page)}
+                                                onClick={() => fetchPage(`/api/v1/countries/?page=${page}&page_size=${countriesPerPage}`, page)}
                                                 disabled={loading}
                                             >
                                                 {page}
@@ -179,6 +235,12 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
                         countries={countries}
                         onClose={handleCloseModal}
                         onDelete={handleDelete}
+                    />
+                )}
+                {showAddModal && (
+                    <AddCountryModal
+                        onClose={() => setShowAddModal(false)}
+                        onAddCountry={handleAddCountry}
                     />
                 )}
             </section>
