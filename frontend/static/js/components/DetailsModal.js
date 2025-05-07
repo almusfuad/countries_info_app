@@ -1,4 +1,4 @@
-const DetailsModal = ({ country, countries, onClose }) => {
+const DetailsModal = ({ country, countries, onClose, onDelete }) => {
     if (!country) {
         console.error('Invalid country data:', country);
         return null;
@@ -13,6 +13,35 @@ const DetailsModal = ({ country, countries, onClose }) => {
     const currencies = Array.isArray(country.currencies) && country.currencies.length > 0
         ? country.currencies.join(', ')
         : 'N/A';
+
+    const handleDelete = async () => {
+        if (!window.confirm(`Are you sure you want to delete ${country.name}?`)) {
+            return;
+        }
+
+        try {
+            const accessToken = getCookie('access');
+            if (!accessToken) {
+                throw new Error('No authentication token found. Please log in.');
+            }
+
+            await axios.delete(`/api/v1/countries/${country.id}/`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            showNotification(`Country '${country.name}' has been soft-deleted.`, 'is-success');
+            if (onDelete) {
+                onDelete(country.id);
+            }
+            onClose();
+        } catch (error) {
+            console.error('Error deleting country:', error);
+            const message = error.response?.data?.detail || 'Failed to delete country. Please try again.';
+            showNotification(message, 'is-danger');
+        }
+    };
 
     return (
         <div className="modal is-active">
@@ -46,6 +75,7 @@ const DetailsModal = ({ country, countries, onClose }) => {
                 </section>
                 <footer className="modal-card-foot">
                     <button className="button" onClick={onClose}>Close</button>
+                    <button className="button is-danger" onClick={handleDelete}>Delete</button>
                 </footer>
             </div>
         </div>

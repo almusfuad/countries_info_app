@@ -1,4 +1,3 @@
-// Add at the top of app.js or in a separate utils.js
 window.showNotification = (message, type) => {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
@@ -15,4 +14,23 @@ window.showNotification = (message, type) => {
         notification.remove();
     });
     setTimeout(() => notification.remove(), 3000);
+};
+
+window.refreshAccessToken = () => {
+    const refresh = getCookie('refresh');
+    if (!refresh) return Promise.resolve(null);
+    return fetch('/auth/v1/token/refresh/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.access) {
+            setCookie('access', data.access, 60); // Assuming 60-minute expiry
+            return data.access;
+        }
+        return null;
+    })
+    .catch(() => null);
 };

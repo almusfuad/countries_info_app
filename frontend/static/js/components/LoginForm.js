@@ -1,66 +1,48 @@
-const { useState } = React;
+const LoginForm = ({ onLoginSuccess }) => {
+    const [username, setUsername] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [loading, setLoading] = React.useState(false);
 
-    const LoginForm = ({ onLoginSuccess }) => {
-        const [username, setUsername] = useState('');
-        const [password, setPassword] = useState('');
-        const [notification, setNotification] = useState(null);
-        const [loading, setLoading] = useState(false);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
 
-
-        const showNotification = (message, type) => {
-            setNotification({ message, type });
-            setTimeout(() => setNotification(null), 5000);
-        }
-
-
-        const handleSubmit = async (e) => {
-            e.preventDefault();
-            setLoading(true);
-            setNotification(null);
-
-
-            fetch('/auth/v1/login/', {
-                method: 'POST',
+        try {
+            const response = await axios.post('/auth/v1/login/', {
+                username,
+                password
+            }, {
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password }),
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.access && data.refresh) {
-                        setCookie('access', data.access, 60);
-                        setCookie('refresh', data.refresh, 7 * 24 * 60);
-                        setLoading(false);
-                        showNotification('Login successful!', 'is-success');
-                        onLoginSuccess();
-                    } else {
-                        throw new Error("Invalid response from server");
-                    }
-                })
-                .catch(err => {
-                    setLoading(false);
-                    showNotification(err.message || 'Login failed. Please check your credentials.', 'is-danger');
-                });
-        };
+                }
+            });
 
+            const { access, refresh } = response.data;
+            if (access && refresh) {
+                setCookie('access', access, 60); // 60 minutes
+                setCookie('refresh', refresh, 7 * 24 * 60); // 7 days
+                showNotification('Login successful!', 'is-success');
+                onLoginSuccess();
+            } else {
+                throw new Error('Invalid response from server');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            const message = error.response?.status === 400
+                ? 'Invalid username or password.'
+                : error.response?.data?.detail || 'Login failed. Please try again.';
+            showNotification(message, 'is-danger');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        return (
-            <div className="columns is-centered">
-                <div className="column is-half">
-                    <div className="box mx-auto" style={{ maxWidth: '500px' }}>
-                        <h1 className="title has-text-centered">Login</h1>
-                        {notification && (
-                            <div className={`notification ${notification.type}`}>
-                                <button className="delete" onClick={() => setNotification(null)}></button>
-                                {notification.message}
-                            </div>
-                        )}
+    return (
+        <div className="columns is-centered">
+            <div className="column is-half">
+                <div className="box mx-auto" style={{ maxWidth: '500px' }}>
+                    <h1 className="title has-text-centered">Login</h1>
+                    <form onSubmit={handleSubmit}>
                         <div className="field">
                             <label className="label">Username</label>
                             <div className="control has-icons-left">
@@ -99,15 +81,16 @@ const { useState } = React;
                             <div className="control">
                                 <button
                                     className={`button is-primary is-fullwidth ${loading ? 'is-loading' : ''}`}
-                                    onClick={handleSubmit}
+                                    type="submit"
                                     disabled={loading}
                                 >
                                     Login
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
-        );
-    };
+        </div>
+    );
+};

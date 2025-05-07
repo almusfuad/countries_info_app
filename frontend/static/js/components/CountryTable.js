@@ -1,4 +1,4 @@
-const CountryTable = ({ countries, onDetailsClick }) => {
+const CountryTable = ({ countries, onDetailsClick, onDelete }) => {
     if (!countries || !Array.isArray(countries)) {
         console.error('Invalid countries data:', countries);
         return <p>No countries available.</p>;
@@ -9,6 +9,7 @@ const CountryTable = ({ countries, onDetailsClick }) => {
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>CCA2</th>
                     <th>Capital</th>
                     <th>Population</th>
                     <th>Timezones</th>
@@ -22,6 +23,7 @@ const CountryTable = ({ countries, onDetailsClick }) => {
                     return (
                         <tr key={country.name || index}>
                             <td>{country.name || 'N/A'}</td>
+                            <td>{country.cca2 || 'N/A'}</td>
                             <td>{country.capital || 'N/A'}</td>
                             <td>{typeof country.population === 'number' ? country.population.toLocaleString() : 'N/A'}</td>
                             <td>{Array.isArray(country.timezones) ? country.timezones.join(', ') : 'N/A'}</td>

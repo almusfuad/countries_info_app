@@ -1,10 +1,8 @@
-const { useState, useEffect } = React;
-
 const App = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [countries, setCountries] = useState([]);
-    const [paginationData, setPaginationData] = useState({ count: 0, next: null, previous: null });
-    const [loading, setLoading] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+    const [countries, setCountries] = React.useState([]);
+    const [paginationData, setPaginationData] = React.useState({ count: 0, next: null, previous: null });
+    const [loading, setLoading] = React.useState(true);
 
     const fetchCountries = async (token, { page = 1, url = null } = {}) => {
         try {
@@ -40,12 +38,7 @@ const App = () => {
             };
         } catch (err) {
             console.error('Fetch countries error:', err);
-            // Fallback notification if showNotification is undefined
-            if (typeof showNotification === 'function') {
-                showNotification('Failed to fetch countries. Please try again later.', 'is-danger');
-            } else {
-                console.warn('showNotification not defined, using console');
-            }
+            showNotification('Failed to fetch countries. Please try again later.', 'is-danger');
             return { results: [], count: 0, next: null, previous: null };
         }
     };
@@ -83,7 +76,6 @@ const App = () => {
                     'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json'
                 },
-                
             })
                 .then(response => {
                     if (response.ok) {
@@ -111,7 +103,7 @@ const App = () => {
         }
     };
 
-    useEffect(() => {
+    React.useEffect(() => {
         checkLoginStatus();
     }, []);
 

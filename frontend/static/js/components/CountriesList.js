@@ -1,17 +1,15 @@
-const { useState, useEffect } = React;
-
 const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetchCountries }) => {
-    const [filteredCountries, setFilteredCountries] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCountry, setSelectedCountry] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalCount, setTotalCount] = useState(paginationData.count || 0);
-    const [nextUrl, setNextUrl] = useState(paginationData.next || null);
-    const [previousUrl, setPreviousUrl] = useState(paginationData.previous || null);
-    const [loading, setLoading] = useState(false);
+    const [filteredCountries, setFilteredCountries] = React.useState([]);
+    const [searchTerm, setSearchTerm] = React.useState('');
+    const [selectedCountry, setSelectedCountry] = React.useState(null);
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const [totalCount, setTotalCount] = React.useState(paginationData.count || 0);
+    const [nextUrl, setNextUrl] = React.useState(paginationData.next || null);
+    const [previousUrl, setPreviousUrl] = React.useState(paginationData.previous || null);
+    const [loading, setLoading] = React.useState(false);
     const countriesPerPage = 25;
 
-    useEffect(() => {
+    React.useEffect(() => {
         console.log('Countries prop:', countries);
         console.log('Pagination data:', paginationData);
         if (!Array.isArray(countries)) {
@@ -42,11 +40,7 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
             setCurrentPage(pageNum);
         } catch (err) {
             console.error('Fetch page error:', err);
-            if (typeof showNotification === 'function') {
-                showNotification('Failed to fetch page. Please try again.', 'is-danger');
-            } else {
-                console.warn('showNotification not defined, using console');
-            }
+            showNotification('Failed to fetch page. Please try again.', 'is-danger');
         }
         setLoading(false);
     };
@@ -71,7 +65,31 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
         setSelectedCountry(null);
     };
 
-    const totalPages = Math.ceil((searchTerm ? filteredCountries.length : totalCount) / countriesPerPage);
+    const handleDelete = async (countryId) => {
+        setLoading(true);
+        const accessToken = getCookie('access');
+        try {
+            // Check if deleting the last item on the page
+            const newTotalCount = totalCount - 1;
+            let targetPage = currentPage;
+            if (countries.length === 1 && currentPage > 1) {
+                targetPage = currentPage - 1; // Go to previous page
+            }
+            const data = await fetchCountries(accessToken, { page: targetPage });
+            setCountries(data.results);
+            setTotalCount(newTotalCount);
+            setNextUrl(data.next);
+            setPreviousUrl(data.previous);
+            setCurrentPage(targetPage);
+            setSelectedCountry(null);
+        } catch (err) {
+            console.error('Error refreshing countries after delete:', err);
+            showNotification('Failed to refresh country list.', 'is-danger');
+        }
+        setLoading(false);
+    };
+
+    const totalPages = Math.ceil(totalCount / countriesPerPage);
 
     return (
         <div className="container is-max-desktop">
@@ -119,6 +137,7 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
                             <CountryTable 
                                 countries={filteredCountries}
                                 onDetailsClick={handleDetailsClick}
+                                onDelete={handleDelete}
                             />
                             <nav className="pagination" role="navigation" aria-label="pagination">
                                 <button
@@ -159,6 +178,7 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
                         country={selectedCountry}
                         countries={countries}
                         onClose={handleCloseModal}
+                        onDelete={handleDelete}
                     />
                 )}
             </section>

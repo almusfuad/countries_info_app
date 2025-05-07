@@ -8,8 +8,6 @@ const setCookie = (name, value, minutes) => {
     document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Strict";
 };
 
-
-
 const getCookie = (name) => {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
@@ -19,9 +17,8 @@ const getCookie = (name) => {
         if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
     }
     return null;
-}
-
+};
 
 const deleteCookie = (name) => {
     document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict';
-}
+};
