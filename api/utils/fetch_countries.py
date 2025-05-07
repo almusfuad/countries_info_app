@@ -69,7 +69,8 @@ def preprocess_data(fetched_data):
         "languages": df["languages"].apply(lambda x: list(x.values()) if isinstance(x, dict) else []),
         "currencies": df["currencies"].apply(lambda x: list(x.values()) if isinstance(x, dict) else []),
         "timezones": df["timezones"].apply(lambda x: x if isinstance(x, list) else []),
-        "flag": df["flags"].apply(lambda x: x.get("png", "") if isinstance(x, dict) else "")
+        "flag": df["flags"].apply(lambda x: x.get("png", "") if isinstance(x, dict) else ""),
+        "is_active": True
     })
 
     # Convert DataFrame to list of dictionaries
@@ -106,7 +107,7 @@ def populate_database():
     editable_fields = [
         "name", "cca2", "capital", "region", "subregion", 
         "population", "area", "languages", "currencies", 
-        "timezones", "flag"
+        "timezones", "flag", "is_active"
     ]
     
     # Convert processed data to CountryInfo objects

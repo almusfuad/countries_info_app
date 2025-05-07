@@ -25,6 +25,9 @@ class CountryInfo(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    # Add a field for soft deletion
+    is_active = models.BooleanField(default=True)
+    
     def __str__(self):
         return self.name
     
