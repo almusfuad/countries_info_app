@@ -1,8 +1,12 @@
 const DetailsModal = ({ country, countries, onClose, onDelete }) => {
+    const [isDeleting, setIsDeleting] = React.useState(false);
+
     if (!country) {
         console.error('Invalid country data:', country);
         return null;
     }
+
+    console.log('Rendering DetailsModal for country:', country);
 
     const sameRegionCountries = Array.isArray(countries)
         ? countries.filter(c => c.region === country.region && c.name !== country.name)
@@ -19,12 +23,16 @@ const DetailsModal = ({ country, countries, onClose, onDelete }) => {
             return;
         }
 
+        setIsDeleting(true);
+        console.log('Attempting to delete country ID:', country.id);
+
         try {
             const accessToken = getCookie('access');
             if (!accessToken) {
                 throw new Error('No authentication token found. Please log in.');
             }
 
+            console.log('Sending DELETE request to:', `/api/v1/countries/${country.id}/`);
             await axios.delete(`/api/v1/countries/${country.id}/`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -33,6 +41,7 @@ const DetailsModal = ({ country, countries, onClose, onDelete }) => {
 
             showNotification(`Country '${country.name}' has been soft-deleted.`, 'is-success');
             if (onDelete) {
+                console.log('Calling onDelete with ID:', country.id);
                 onDelete(country.id);
             }
             onClose();
@@ -40,6 +49,8 @@ const DetailsModal = ({ country, countries, onClose, onDelete }) => {
             console.error('Error deleting country:', error);
             const message = error.response?.data?.detail || 'Failed to delete country. Please try again.';
             showNotification(message, 'is-danger');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -73,9 +84,16 @@ const DetailsModal = ({ country, countries, onClose, onDelete }) => {
                         <p>No other countries in this region.</p>
                     )}
                 </section>
-                <footer className="modal-card-foot">
-                    <button className="button" onClick={onClose}>Close</button>
-                    <button className="button is-danger" onClick={handleDelete}>Delete</button>
+                <footer className="modal-card-foot" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                    <button className="button" onClick={onClose} disabled={isDeleting}>Close</button>
+                    <button 
+                        className="button is-danger" 
+                        onClick={handleDelete} 
+                        disabled={isDeleting}
+                        style={{ display: 'inline-block', visibility: 'visible' }}
+                    >
+                        {isDeleting ? 'Deleting...' : 'Delete'}
+                    </button>
                 </footer>
             </div>
         </div>
