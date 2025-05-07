@@ -8,6 +8,7 @@ class CountryInfo(models.Model):
     """
     
     name = models.CharField(max_length=200, unique=True)
+    cca2 = models.CharField(max_length=3, default="")
     capital = models.CharField(max_length=200, blank=True, default="")
     region = models.CharField(max_length=200, blank=True, default="")
     subregion = models.CharField(max_length=200, blank=True, default="")
@@ -29,5 +30,6 @@ class CountryInfo(models.Model):
     
     
     class Meta:
+        indexes = [models.Index(fields=["name"])]
         verbose_name_plural = "Country Info"
         ordering = ["name"]
