@@ -111,7 +111,6 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
                     'Content-Type': 'application/json',
                 },
             });
-            // Estimate the page where the new country would appear based on its name
             const newCountryName = newCountry.name.toLowerCase();
             const sortedCountries = [...countries, response.data].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
             const newIndex = sortedCountries.findIndex(c => c.name.toLowerCase() === newCountryName);
@@ -129,6 +128,33 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
         } catch (err) {
             console.error('Error adding country:', err);
             showNotification(err.response?.data?.detail || 'Failed to add country.', 'is-danger');
+        }
+        setLoading(false);
+    };
+
+    const handleUpdateCountry = async (updatedCountry) => {
+        setLoading(true);
+        const accessToken = getCookie('access');
+        try {
+            console.log('Updating country:', updatedCountry);
+            const newCountryName = updatedCountry.name.toLowerCase();
+            const sortedCountries = countries.map(c => c.id === updatedCountry.id ? updatedCountry : c)
+                .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            const newIndex = sortedCountries.findIndex(c => c.name.toLowerCase() === newCountryName);
+            const targetPage = Math.floor(newIndex / countriesPerPage) + 1;
+            console.log('Updated country index:', newIndex, 'Target page:', targetPage);
+            const data = await fetchCountries(accessToken, { page: targetPage });
+            console.log('Post-update data:', data);
+            setCountries(data.results.sort((a, b) => (a.name || '').localeCompare(b.name || '')));
+            setTotalCount(data.count);
+            setNextUrl(data.next);
+            setPreviousUrl(data.previous);
+            setCurrentPage(targetPage);
+            setSelectedCountry(null);
+            showNotification(`Country '${updatedCountry.name}' updated successfully.`, 'is-success');
+        } catch (err) {
+            console.error('Error refreshing countries after update:', err);
+            showNotification('Failed to refresh country list.', 'is-danger');
         }
         setLoading(false);
     };
@@ -235,6 +261,7 @@ const CountriesList = ({ countries, onLogout, setCountries, paginationData, fetc
                         countries={countries}
                         onClose={handleCloseModal}
                         onDelete={handleDelete}
+                        onUpdate={handleUpdateCountry}
                     />
                 )}
                 {showAddModal && (
