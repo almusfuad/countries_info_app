@@ -55,7 +55,7 @@ Start the Django development server:
 
 ## Creating a Superuser
 Create an admin user to log in:
-    `bash`
+    `bash`\n
     ```python manage.py createsuperuser```
 
 Follow prompts to set username, email, and password.
