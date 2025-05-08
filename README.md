@@ -8,32 +8,32 @@ GitHub Repository: https://github.com/almusfuad/external_api_app
 ## Cloning the Repository
 
 1. Clone the repository:
-```bash
-   git clone https://github.com/almusfuad/external_api_app.git```
+   `bash`
+   ```git clone https://github.com/almusfuad/external_api_app.git```
 
 
 2. Navigate to the project directory:
-```bash
-   cd external_api_app```
+    `bash`
+    ```cd external_api_app```
 
 
 
 ## Creating and Activating the Environment
 
 1. Create a Python virtual environment:
-```bash 
-python -m venv venv```
+    `bash`
+    ```python -m venv venv```
 
 
 2. Activate the environment:
 - On Linux/Mac:
-```bash
-source venv/bin/activate```
+    `bash`
+    ```source venv/bin/activate```
 
 
 - On Windows:
-```bash
-venv\Scripts\activate```
+    `bash`
+    ```venv\Scripts\activate```
 
 
 
@@ -41,29 +41,29 @@ venv\Scripts\activate```
 
 ## Installing Dependencies
 Install Python dependencies from requirements.txt:
-```bash
-pip install -r requirements.txt```
+    `bash`
+    ```pip install -r requirements.txt```
 
 
 ## Running the Project
 
 Start the Django development server:
-```bash
-python manage.py runserver```
+    `bash`
+    ```python manage.py runserver```
 
 
 
 ## Creating a Superuser
 Create an admin user to log in:
-```bash
-python manage.py createsuperuser```
+    `bash`
+    ```python manage.py createsuperuser```
 
 Follow prompts to set username, email, and password.
 
 ## Accessing the UI
 Open your browser and navigate to:
-```plain
-http://127.0.0.1:8000```
+    `plain`
+    ```http://127.0.0.1:8000```
 
 
 Happy coding! 🌍
