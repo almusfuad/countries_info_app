@@ -11,7 +11,6 @@ const AddCountryModal = ({ onClose, onAddCountry }) => {
         timezones: '',
         flag: '',
         cca2: '',
-        is_active: true,
     });
     const [loading, setLoading] = React.useState(false);
     const [errors, setErrors] = React.useState({});
@@ -140,7 +139,6 @@ const AddCountryModal = ({ onClose, onAddCountry }) => {
             timezones: formData.timezones ? formData.timezones.split(',').map(t => t.trim()).filter(t => t) : [],
             flag: formData.flag.trim() || '',
             cca2: formData.cca2.trim() || '',
-            is_active: formData.is_active,
         };
 
         try {
@@ -336,18 +334,6 @@ const AddCountryModal = ({ onClose, onAddCountry }) => {
                                 />
                             </div>
                             {errors.cca2 && <p className="help is-danger">{errors.cca2}</p>}
-                        </div>
-                        <div className="field">
-                            <label className="checkbox">
-                                <input
-                                    type="checkbox"
-                                    name="is_active"
-                                    checked={formData.is_active}
-                                    onChange={handleChange}
-                                    disabled={loading}
-                                />
-                                &nbsp;Is Active
-                            </label>
                         </div>
                     </form>
                 </section>
