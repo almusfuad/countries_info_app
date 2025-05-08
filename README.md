@@ -1,18 +1,18 @@
-# External API App
+# countries_info_app
 
 ## Project Overview
 A full-stack web application built with Django (backend) and React (frontend) to manage country information. Features include viewing, adding, updating, and deleting countries with pagination, search, and JWT-based authentication. The backend uses a PostgreSQL database and integrates with an external API for country data, while the frontend provides a responsive UI with Bulma CSS.
-GitHub Repository: https://github.com/almusfuad/external_api_app
+GitHub Repository: https://github.com/almusfuad/countries_info_app
 
 
 ## Cloning the Repository
 
 1. Clone the repository:
-   ```git clone https://github.com/almusfuad/external_api_app.git```
+   ```git clone https://github.com/almusfuad/countries_info_app.git```
 
 
 2. Navigate to the project directory:
-    ```cd external_api_app```
+    ```cd countries_info_app```
 
 
 
