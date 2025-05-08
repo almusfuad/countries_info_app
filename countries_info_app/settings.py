@@ -41,7 +41,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'external_api_app.urls'
+ROOT_URLCONF = 'countries_info_app.urls'
 
 TEMPLATES = [
     {
@@ -59,7 +59,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'external_api_app.wsgi.application'
+WSGI_APPLICATION = 'countries_info_app.wsgi.application'
 
 
 REST_FRAMEWORK = {
